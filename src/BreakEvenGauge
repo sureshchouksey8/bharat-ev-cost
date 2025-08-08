@@ -1,0 +1,49 @@
+// src/components/BreakEvenGauge.tsx
+"use client";
+
+export default function BreakEvenGauge({ months }: { months: number }) {
+  const size = 220;
+  const stroke = 16;
+  const r = (size - stroke) / 2;
+  const C = 2 * Math.PI * r;
+
+  let pct = 0;
+  if (isFinite(months)) {
+    const clamped = Math.max(0, Math.min(36, months));
+    pct = 1 - clamped / 36;
+  }
+  const filled = Math.round(pct * 100);
+  const dash = C * pct;
+  const gap = C - dash;
+
+  return (
+    <div className="relative w-[220px] h-[220px]">
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <defs>
+          <linearGradient id="bevGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#FFD166" />
+            <stop offset="100%" stopColor="#06D6A0" />
+          </linearGradient>
+        </defs>
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(255,255,255,0.15)" strokeWidth={stroke} fill="none"></circle>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          stroke="url(#bevGrad)"
+          strokeWidth={stroke}
+          fill="none"
+          strokeDasharray={`${dash} ${gap}`}
+          strokeLinecap="round"
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          style={{ transition: "stroke-dasharray 600ms ease" }}
+        ></circle>
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="text-3xl font-extrabold">{isFinite(months) ? months : "—"}</div>
+        <div className="text-xs uppercase tracking-wide opacity-85">months</div>
+        <div className="text-xs mt-1 opacity-70">{isFinite(months) ? `${filled}%` : "n/a"}</div>
+      </div>
+    </div>
+  );
+}
